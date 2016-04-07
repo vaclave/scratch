@@ -29,7 +29,8 @@ def set_plyNumber(intDepth, strNext):
 		plyNumber = (intDepth * 2) - 1
 	else:
 		plyNumber = intDepth * 2
-	return
+
+	return plyNumber 
 
 def chess_reset():
 	global chess_board
@@ -68,14 +69,13 @@ def chess_boardGet():
 
 def chess_boardSet(strIn):
 	global chess_board
+	global plyNumber
 
 	strIn = strIn.split('\n')
 
 	intDepth = int(strIn[0].split(" ")[0])
 	strNext = strIn[0].split(" ")[1]	
-
-	set_plyNumber(intDepth, strNext)
-
+	
 	chess_board = []
 	chess_board.append(strIn[1])
 	chess_board.append(strIn[2])
@@ -88,7 +88,28 @@ def chess_boardSet(strIn):
 
 def chess_winner():
 	# determine the winner of the current state of the game and return '?' or '=' or 'W' or 'B' - note that we are returning a character and not a string
-	pass
+	global chess_board
+	global plyNumber
+
+	# Considered false until king found within board.
+	white_has_king = False
+	black_has_king = False
+
+	for row in chess_board:
+		if 'K' in row:
+			white_has_king = True
+		elif 'k' in row:
+			black_has_king = True	
+
+	if (plyNumber >= 80):
+		return '='
+
+	if (black_has_king == False):
+		return 'W'
+	elif (white_has_king == False):
+		return 'B'
+
+	return '?'
 
 def chess_isValid(intX, intY):
 	if intX < 0:
@@ -108,21 +129,51 @@ def chess_isValid(intX, intY):
 
 def chess_isEnemy(strPiece):
 	# with reference to the state of the game, return whether the provided argument is a piece from the side not on move - note that we could but should not use the other is() functions in here but probably
+	global plyNumber
 	
-	return False
+	strNext = get_strNext()
+	white_pieces = ['K', 'Q', 'B', 'N', 'R', 'P']
+	black_pieces = ['k', 'q', 'b', 'n', 'r', 'p']
 
+	if (strPiece == '.'):
+		return False
+	if (strNext == 'W'):
+		for piece in black_pieces:
+			if (strPiece == piece):
+				return True
+	elif (strNext == 'B'):
+		for piece in white_pieces:
+			if (strPiece == piece):
+				return True
+	return False
 
 def chess_isOwn(strPiece):
 	# with reference to the state of the game, return whether the provided argument is a piece from the side on move - note that we could but should not use the other is() functions in here but probably
-	
-	return False
+	global plyNumber
 
+        strNext = get_strNext()
+        white_pieces = ['K', 'Q', 'B', 'N', 'R', 'P']
+        black_pieces = ['k', 'q', 'b', 'n', 'r', 'p']
+
+        if (strPiece == '.'):
+                return False
+        if (strNext == 'W'):
+                for piece in white_pieces:
+                        if (strPiece == piece):
+                                return True
+        elif (strNext == 'B'):
+                for piece in black_pieces:
+                        if (strPiece == piece):
+                                return True
+	return False
 
 def chess_isNothing(strPiece):
 	# return whether the provided argument is not a piece / is an empty field - note that we could but should not use the other is() functions in here but probably
 	
-	return False
-
+	if (strPiece == '.'):
+		return True
+	else:	
+		return False
 
 def chess_eval():
 	# with reference to the state of the game, return the the evaluation score of the side on move - note that positive means an advantage while negative means a disadvantage
