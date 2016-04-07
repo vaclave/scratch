@@ -2,38 +2,93 @@ import random
 
 ##########################################################
 
+chess_board = [] 
+plyNumber = 1
+
+def get_intDepth():
+	global plyNumber
+
+	intDepth = 0
+	intDepth = (plyNumber / 2) + (plyNumber % 2)
+	return intDepth
+
+def get_strNext():
+	global plyNumber
+
+	strNext = ''
+	if (plyNumber % 2 == 0):
+		strNext = 'B'
+	else:
+		strNext = 'W'
+	return strNext
+
+def set_plyNumber(intDepth, strNext):
+	global plyNumber
+
+	if (strNext == 'W'):
+		plyNumber = (intDepth * 2) - 1
+	else:
+		plyNumber = intDepth * 2
+	return
+
 def chess_reset():
-	# reset the state of the game / your internal variables - note that this function is highly dependent on your implementation
-	
-	pass
+	global chess_board
+	global plyNumber
+
+	plyNumber = 1
+	intDepth = 1
+	strNext = 'W'	
+
+	chess_board = []
+	chess_board.append('kqbnr')
+	chess_board.append('ppppp')
+	chess_board.append('.....')
+	chess_board.append('.....')
+	chess_board.append('PPPPP')
+	chess_board.append('RNBQK')
+
+	return
 
 def chess_boardGet():
-	# return the state of the game - one example is given below - note that the state has exactly 40 or 41 characters
-	
+	global chess_board
+
+	intDepth = get_intDepth()
+	strNext = get_strNext()
+
 	strOut = ''
-	
-	strOut += '1 W\n'
-	strOut += 'kqbnr\n'
-	strOut += 'ppppp\n'
-	strOut += '.....\n'
-	strOut += '.....\n'
-	strOut += 'PPPPP\n'
-	strOut += 'RNBQK\n'
-	
+	strOut += str(intDepth) + ' ' + strNext + '\n'
+	strOut += chess_board[0] + '\n'
+	strOut += chess_board[1] + '\n'
+	strOut += chess_board[2] + '\n'
+	strOut += chess_board[3] + '\n'
+	strOut += chess_board[4] + '\n'
+	strOut += chess_board[5] + '\n'
+
 	return strOut
 
-
 def chess_boardSet(strIn):
-	# read the state of the game from the provided argument and set your internal variables accordingly - note that the state has exactly 40 or 41 characters
-	
-	pass
+	global chess_board
 
+	strIn = strIn.split('\n')
+
+	intDepth = int(strIn[0].split(" ")[0])
+	strNext = strIn[0].split(" ")[1]	
+
+	set_plyNumber(intDepth, strNext)
+
+	chess_board = []
+	chess_board.append(strIn[1])
+	chess_board.append(strIn[2])
+	chess_board.append(strIn[3])
+	chess_board.append(strIn[4])
+	chess_board.append(strIn[5])
+	chess_board.append(strIn[6])
+
+	return
 
 def chess_winner():
 	# determine the winner of the current state of the game and return '?' or '=' or 'W' or 'B' - note that we are returning a character and not a string
-	
-	return '?'
-
+	pass
 
 def chess_isValid(intX, intY):
 	if intX < 0:
