@@ -75,6 +75,7 @@ def chess_boardSet(strIn):
 
 	intDepth = int(strIn[0].split(" ")[0])
 	strNext = strIn[0].split(" ")[1]	
+	set_plyNumber(intDepth, strNext)
 	
 	chess_board = []
 	chess_board.append(strIn[1])
@@ -134,7 +135,7 @@ def chess_isEnemy(strPiece):
 	strNext = get_strNext()
 	white_pieces = ['K', 'Q', 'B', 'N', 'R', 'P']
 	black_pieces = ['k', 'q', 'b', 'n', 'r', 'p']
-
+	
 	if (strPiece == '.'):
 		return False
 	if (strNext == 'W'):
