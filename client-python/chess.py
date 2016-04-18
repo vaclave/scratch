@@ -184,17 +184,19 @@ def chess_eval():
 
 def chess_moves():
 	# with reference to the state of the game and return the possible moves - one example is given below - note that a move has exactly 6 characters
-	
+	global chess_board
 	strOut = []
 	
-	strOut.append('a2-a3\n')
-	strOut.append('b2-b3\n')
-	strOut.append('c2-c3\n')
-	strOut.append('d2-d3\n')
-	strOut.append('e2-e3\n')
-	strOut.append('b1-a3\n')
-	strOut.append('b1-c3\n')
-	
+#	strOut.append('a2-a3\n')
+#	strOut.append('b2-b3\n')
+#	strOut.append('c2-c3\n')
+#	strOut.append('d2-d3\n')
+#	strOut.append('e2-e3\n')
+#	strOut.append('b1-a3\n')
+#	strOut.append('b1-c3\n')
+
+
+		
 	return strOut
 
 
@@ -209,12 +211,106 @@ def chess_movesEvaluated():
 	
 	return []
 
+def get_value_int(value):
+
+	# Strings need to be converted from unicode to int
+	value = value.lower()	
+	
+	if (value == 'a' or value == '1'):
+		value = 1
+	elif (value == 'b' or value == '2'):
+		value = 2
+	elif (value == 'c' or value == '3'):
+		value = 3
+	elif (value == 'd' or value == '4'):
+		value = 4
+	elif (value == 'e' or value == '5'):
+		value = 5
+	elif (value == '6'):
+		value = 6
+	else:
+		print("Invalid column value\n")
+		return False
+
+	return value
 
 def chess_move(strIn):
 	# perform the supplied move (for example 'a5-a4\n') and update the state of the game / your internal variables accordingly - note that it advised to do a sanity check of the supplied move
-	
-	pass
 
+	global chess_board
+	
+	# Get the row and column position as numerical value
+	start = strIn.split("-")[0]
+	finish = strIn.split("-")[1]
+
+	start_column = get_value_int(start[0]) - 1
+	finish_column = get_value_int(finish[0]) - 1
+
+	start_row = 6 - get_value_int(start[1])
+	finish_row = 6 - get_value_int(finish[1])
+
+	# Get the value of the piece being moved
+	current_piece = chess_board[start_row][start_column]
+	
+	# Check to ensure move is in range
+	if not (chess_isValid(start_column, start_row)):
+		print("Invalid Move: start out of range\n")
+		return
+
+	elif not (chess_isValid(finish_column, finish_row)):
+		print("Invalid Move: finish out of range\n")
+		return
+
+	# Check to ensure piece is owned by player
+	elif not (chess_isOwn(current_piece)):
+		print("Invalid Move: Not your piece to move\n")
+		return
+
+	# If error checking passes, move the piece
+	else:
+		# Get current board setup
+		old_board=chess_boardGet().split('\n')
+		del old_board[0]
+		print(old_board)
+	
+		# Update who's turn it is
+		chess_board = []
+		strNext = get_strNext()
+		intDepth = get_intDepth()
+
+		if (strNext == 'W'):
+			strNext = 'B'
+		else:
+			strNext = 'W'
+			intDepth += 1
+		set_plyNumber(intDepth, strNext)
+
+		# Move the piece to the correct position
+		for i in range (0, 6):
+			if (i == finish_row and finish_row != start_row):
+				if (current_piece == 'P' and finish_row == 0):
+					current_piece = 'Q'
+				elif (current_piece == 'p' and finish_row == 6):
+					current_piece = 'q'
+				new = old_board[finish_row][:finish_column] + current_piece + old_board[finish_row][finish_column + 1:]
+				chess_board.append(new)
+			elif (i == start_row and start_row != finish_row):
+				new = old_board[start_row][:start_column] + '.' + old_board[start_row][start_column + 1:]
+				chess_board.append(new)
+			elif ((i == start_row or i == finish_row) and start_row == finish_row):
+				new = ''
+				row = old_board[start_row]
+				for i in range(0, 5):
+					if i == start_column:
+						new += '.'
+					elif i == finish_column:
+						new += current_piece
+					else:
+						new += row[i]
+				chess_board.append(new)
+			else:
+				chess_board.append(old_board[i])
+		return
 
 def chess_moveRandom():
 	# perform a random move and return it - one example output is given below - note that you can call the chess_movesShuffled() function as well as the chess_move() function in here
