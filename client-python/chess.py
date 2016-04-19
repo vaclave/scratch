@@ -178,9 +178,50 @@ def chess_isNothing(strPiece):
 
 def chess_eval():
 	# with reference to the state of the game, return the the evaluation score of the side on move - note that positive means an advantage while negative means a disadvantage
-	
-	return 0
 
+	score = 0
+	king_pts = 100
+	queen_pts = 9
+	rook_pts = 5
+	bishop_pts = 3
+	knight_pts = 3
+	pawn_pts = 1
+	
+	for i in range (0, 6):
+		for j in range(0, 5):
+			cur_piece = chess_board[i][j]
+			if (chess_isOwn(cur_piece)):
+				if (cur_piece == 'k' or cur_piece =='K'):
+					score += king_pts		
+				elif (cur_piece == 'q' or cur_piece =='Q'):
+					score += queen_pts
+				elif (cur_piece == 'r' or cur_piece =='R'):
+					score += rook_pts
+				elif (cur_piece == 'b' or cur_piece =='B'):
+					score += bishop_pts
+				elif (cur_piece == 'k' or cur_piece =='K'):
+					score += knight_pts
+				elif (cur_piece == 'p' or cur_piece =='P'):
+					score += pawn_pts
+				else:
+					continue
+
+			else:
+				if (cur_piece == 'k' or cur_piece =='K'):               
+                                        score -= king_pts
+                                elif (cur_piece == 'q' or cur_piece =='Q'):
+                                        score -= queen_pts
+                                elif (cur_piece == 'r' or cur_piece =='R'):
+                                        score -= rook_pts
+                                elif (cur_piece == 'b' or cur_piece =='B'):
+                                        score -= bishop_pts
+                                elif (cur_piece == 'k' or cur_piece =='K'):
+                                        score -= knight_pts
+                                elif (cur_piece == 'p' or cur_piece =='P'):
+                                        score -= pawn_pts
+                                else:
+                                        continue
+	return score
 
 def chess_moves():
 	# with reference to the state of the game and return the possible moves - one example is given below - note that a move has exactly 6 characters
