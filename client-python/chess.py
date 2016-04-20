@@ -4,6 +4,7 @@ import random
 
 chess_board = [] 
 plyNumber = 1
+possible_moves = []
 
 def get_intDepth():
 	global plyNumber
@@ -51,7 +52,6 @@ def chess_reset():
 	return
 
 def chess_boardGet():
-	global chess_board
 
 	intDepth = get_intDepth()
 	strNext = get_strNext()
@@ -89,8 +89,6 @@ def chess_boardSet(strIn):
 
 def chess_winner():
 	# determine the winner of the current state of the game and return '?' or '=' or 'W' or 'B' - note that we are returning a character and not a string
-	global chess_board
-	global plyNumber
 
 	# Considered false until king found within board.
 	white_has_king = False
@@ -130,7 +128,6 @@ def chess_isValid(intX, intY):
 
 def chess_isEnemy(strPiece):
 	# with reference to the state of the game, return whether the provided argument is a piece from the side not on move - note that we could but should not use the other is() functions in here but probably
-	global plyNumber
 	
 	strNext = get_strNext()
 	white_pieces = ['K', 'Q', 'B', 'N', 'R', 'P']
@@ -150,7 +147,6 @@ def chess_isEnemy(strPiece):
 
 def chess_isOwn(strPiece):
 	# with reference to the state of the game, return whether the provided argument is a piece from the side on move - note that we could but should not use the other is() functions in here but probably
-	global plyNumber
 
         strNext = get_strNext()
         white_pieces = ['K', 'Q', 'B', 'N', 'R', 'P']
@@ -225,22 +221,159 @@ def chess_eval():
 
 def chess_moves():
 	# with reference to the state of the game and return the possible moves - one example is given below - note that a move has exactly 6 characters
-	global chess_board
-	strOut = []
+	global possible_moves
+
+	possible_moves = []
+	for row in range (0, 6):
+		for column in range (0, 5):
+			cur_piece = chess_board[row][column]
+			if chess_isOwn(cur_piece):
+				cur_row=row
+				cur_column=column
+				get_piece_moves(cur_piece, row, column)
+
+	"".join(possible_moves)
+	return possible_moves
+
+def get_piece_moves(piece, cur_row, cur_column):
+	global possible_moves
+
+	king_moves = [[0,1], [1,0], [1,1], [0,-1], [-1,0], [1,-1], [-1,1], [-1,-1]]
+	queen_moves = [[0,1], [1,0], [1,1], [0,-1], [-1,0], [1,-1], [-1,1], [-1,-1]]
+	rook_moves = [[0,1], [1,0], [0,-1], [-1,0]]
+	bishop_moves = [[1,1], [1,-1], [-1,1], [-1,-1]]
+	bishop_moves_single = [[0,1], [1,0], [0,-1], [-1,0]]
+	knight_moves = [[2,1], [2,-1], [-2,1], [-2,-1], [1,2], [1,-2], [-1,2], [-1,-2]]
+	# First index is the move without capture, other two are only on capture
+	white_pawn_moves = [[-1,0], [-1,1], [-1,-1]]
+	black_pawn_moves = [[1,0], [1,1], [1,-1]]
+
+	# Moves for King
+	if (piece == 'k' or piece == 'K'):
+		for move in king_moves:
+			end_row = cur_row + move[0]
+			end_column = cur_column + move[1]
+			if (chess_isValid(end_column, end_row)):
+				board_value = chess_board[end_row][end_column]
+				if (chess_isNothing(board_value) or chess_isEnemy(board_value)):
+					possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
 	
-#	strOut.append('a2-a3\n')
-#	strOut.append('b2-b3\n')
-#	strOut.append('c2-c3\n')
-#	strOut.append('d2-d3\n')
-#	strOut.append('e2-e3\n')
-#	strOut.append('b1-a3\n')
-#	strOut.append('b1-c3\n')
+	# Moves for Queen
+	if (piece == 'q' or piece == 'Q'):
+		for move in queen_moves:
+			for i in range(1, 6):
+				end_row = cur_row + (move[0] * i)
+                        	end_column = cur_column + (move[1] * i)
+				if (chess_isValid(end_column, end_row)):
+					board_value = chess_board[end_row][end_column]
+					if (chess_isOwn(board_value)):
+						# Can't jump own teammates
+						break
+					elif chess_isEnemy(board_value):
+                                        	possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+						break
+					elif chess_isNothing(board_value):
+                                        	possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+					
+	# Moves for Rook
+	if (piece == 'r' or piece == 'R'):
+		for move in rook_moves:
+			for i in range(1, 6):
+				end_row = cur_row + (move[0] * i)
+                                end_column = cur_column + (move[1] * i)
+                                if (chess_isValid(end_column, end_row)):
+                                        board_value = chess_board[end_row][end_column]
+					if (chess_isOwn(board_value)):
+                                                # Can't jump own teammates
+                                                break
+                                        elif chess_isEnemy(board_value):
+                                                possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+                                                break
+                                        elif chess_isNothing(board_value):
+                                                possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+
+	# Moves for Bishop
+	if (piece == 'b' or piece == 'B'):
+		for move in bishop_moves:
+			for i in range(1, 6):
+                                end_row = cur_row + (move[0] * i)
+                                end_column = cur_column + (move[1] * i)
+                                if (chess_isValid(end_column, end_row)):
+                                        board_value = chess_board[end_row][end_column]
+					if (chess_isOwn(board_value)):
+                                                # Can't jump own teammates
+                                                break
+                                        elif chess_isEnemy(board_value):
+                                                possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+                                                break
+                                        elif chess_isNothing(board_value):
+                                                possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+		for move in bishop_moves_single:
+			end_row = cur_row + move[0]
+                        end_column = cur_column + move[1]
+                        if (chess_isValid(end_column, end_row)):
+                                board_value = chess_board[end_row][end_column]
+                                if (chess_isNothing(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+
+	# Moves for Knight
+	if (piece == 'n' or piece == 'N'):
+		for move in knight_moves:
+			end_row = cur_row + move[0]
+                        end_column = cur_column + move[1]
+                        if (chess_isValid(end_column, end_row)):
+                                board_value = chess_board[end_row][end_column]
+				if (chess_isNothing(board_value) or chess_isEnemy(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
 
 
-		
-	return strOut
+	# Moves for white pawns
+	if (piece == 'P'):
+		for move in white_pawn_moves:
+			end_row = cur_row + move[0]
+                        end_column = cur_column + move[1]
+                        if (chess_isValid(end_column, end_row)):
+				board_value = chess_board[end_row][end_column]
+                                if (white_pawn_moves[0] == move and chess_isNothing(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+				elif ((white_pawn_moves[1] == move or white_pawn_moves[2] == move) and chess_isEnemy(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
 
+	# Moves for black pawns
+	if (piece == 'p'):
+                for move in black_pawn_moves:
+                        end_row = cur_row + move[0]
+                        end_column = cur_column + move[1]
+                        if (chess_isValid(end_column, end_row)):
+                                board_value = chess_board[end_row][end_column]
+                                if (black_pawn_moves[0] == move and chess_isNothing(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
+                                elif ((black_pawn_moves[1] == move or black_pawn_moves[2] == move) and chess_isEnemy(board_value)):
+                                        possible_moves.append(convert_move(cur_row, cur_column, end_row, end_column))
 
+	return 
+
+def convert_move(start_row, start_column, end_row, end_column):
+	value = ''
+	letters = ['a', 'b', 'c', 'd', 'e']
+
+	for i in range(0, 5):
+		if (start_column == i):
+			start_column = letters[i]
+		if (end_column == i):
+			end_column = letters[i]
+	start_row = 6 - start_row
+	end_row = 6 - end_row
+
+	value += str(start_column)
+	value += str(start_row)
+	value += '-'
+	value += str(end_column)
+	value += str(end_row) +'\n'
+
+	''.join(value)
+	return value
+	
 def chess_movesShuffled():
 	# with reference to the state of the game, determine the possible moves and shuffle them before returning them- note that you can call the chess_moves() function in here
 	
@@ -312,7 +445,6 @@ def chess_move(strIn):
 		# Get current board setup
 		old_board=chess_boardGet().split('\n')
 		del old_board[0]
-		print(old_board)
 	
 		# Update who's turn it is
 		chess_board = []
