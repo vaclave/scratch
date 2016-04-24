@@ -5,6 +5,7 @@ import random
 chess_board = [] 
 plyNumber = 1
 possible_moves = []
+moves_stack = []
 
 def get_intDepth():
 	global plyNumber
@@ -36,6 +37,7 @@ def set_plyNumber(intDepth, strNext):
 def chess_reset():
 	global chess_board
 	global plyNumber
+	global moves_stack
 
 	plyNumber = 1
 	intDepth = 1
@@ -48,6 +50,8 @@ def chess_reset():
 	chess_board.append('.....')
 	chess_board.append('PPPPP')
 	chess_board.append('RNBQK')
+
+	moves_stack.append(chess_board)
 
 	return
 
@@ -70,6 +74,7 @@ def chess_boardGet():
 def chess_boardSet(strIn):
 	global chess_board
 	global plyNumber
+	global moves_stack
 
 	strIn = strIn.split('\n')
 
@@ -84,6 +89,8 @@ def chess_boardSet(strIn):
 	chess_board.append(strIn[4])
 	chess_board.append(strIn[5])
 	chess_board.append(strIn[6])
+	
+	moves_stack.append(chess_board)
 
 	return
 
@@ -376,13 +383,17 @@ def convert_move(start_row, start_column, end_row, end_column):
 	
 def chess_movesShuffled():
 	# with reference to the state of the game, determine the possible moves and shuffle them before returning them- note that you can call the chess_moves() function in here
-	
-	return []
+	chess_moves()
+	shuffled_moves = possible_moves
+	random.shuffle(shuffled_moves)
+
+	return shuffled_moves
 
 
 def chess_movesEvaluated():
 	# with reference to the state of the game, determine the possible moves and sort them in order of an increasing evaluation score before returning them - note that you can call the chess_movesShuffled() function in here
-	
+
+		
 	return []
 
 def get_value_int(value):
@@ -412,7 +423,8 @@ def chess_move(strIn):
 	# perform the supplied move (for example 'a5-a4\n') and update the state of the game / your internal variables accordingly - note that it advised to do a sanity check of the supplied move
 
 	global chess_board
-	
+	global moves_stack
+
 	# Get the row and column position as numerical value
 	start = strIn.split("-")[0]
 	finish = strIn.split("-")[1]
@@ -483,6 +495,11 @@ def chess_move(strIn):
 				chess_board.append(new)
 			else:
 				chess_board.append(old_board[i])
+
+		# Append board state after move to the stack
+		moves_stack.append(chess_board)
+		if (len(moves_stack) >= 10):
+			del moves_stack[0]
 		return
 
 def chess_moveRandom():
@@ -511,5 +528,17 @@ def chess_moveAlphabeta(intDepth, intDuration):
 
 def chess_undo():
 	# undo the last move and update the state of the game / your internal variables accordingly - note that you need to maintain an internal variable that keeps track of the previous history for this
+	global chess_board
+	global moves_stack
+	global plyNumber
+
+	if (len(moves_stack) != 0 and len(moves_stack) != 1):
+		# Remove the current state of the board
+		moves_stack.pop()
 	
+		# Set the board to the previous move
+		chess_board = moves_stack.pop()
+
+		plyNumber -= 1
+
 	pass
