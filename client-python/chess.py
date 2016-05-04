@@ -3,6 +3,7 @@ import random
 ##########################################################
 #            Let's break gabi chess
 ##########################################################
+
 chess_board = [] 
 plyNumber = 1
 possible_moves = []
